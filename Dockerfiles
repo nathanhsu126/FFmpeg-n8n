@@ -1,20 +1,26 @@
-# 使用輕量級 Python 映像檔
-FROM python:3.9-slim
+# 使用 Python 3.11 slim 作為基礎
+FROM python:3.11-slim
 
-# 更新並安裝 ffmpeg (Zeabur 的純 Python 環境可能沒有 ffmpeg，所以要用 Docker 安裝)
+# 安裝 FFmpeg
 RUN apt-get update && \
-    apt-get install -y ffmpeg && \
+    apt-get install -y --no-install-recommends ffmpeg && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 # 設定工作目錄
 WORKDIR /app
 
-# 複製需求檔並安裝
+# 複製 requirements
 COPY requirements.txt .
+
+# 安裝 Python 依賴
 RUN pip install --no-cache-dir -r requirements.txt
 
 # 複製程式碼
-COPY main.py .
+COPY . .
+
+# 暴露端口
+EXPOSE 8080
 
 # 啟動服務
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
